@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Customer</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div class="container mt-4">
+    <h1>Add Customer</h1>
+    <form id="addCustomerForm">
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" class="form-control" maxlength="100" required>
+        </div>
+        <div class="form-group">
+            <label for="ic_number">IC Number</label>
+            <input type="text" id="ic_number" class="form-control" maxlength="14"  pattern="\d*" required>
+        </div>
+        <div class="form-group">
+            <label for="dob">Date of Birth</label>
+            <input type="date" id="dob" class="form-control" required>
+            <small class="form-text text-muted">You must be at least 18 years old.</small>
+        </div>
+        <div class="form-group">
+            <label for="address">Address</label>
+            <input type="text" id="address" class="form-control" maxlength="100">
+        </div>
+        <div class="form-group">
+            <label for="address_country">Country</label>
+            <select id="address_country" class="form-control" required>
+                <option value="Malaysia">Malaysia</option>
+                <option value="Singapore">Singapore</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="address_postcode">Postcode</label>
+            <input type="text" id="address_postcode" class="form-control" maxlength="20"  pattern="\d*">
+        </div>
+        <button type="submit" class="btn btn-primary">Add Customer</button>
+    </form>
+</div>
+<script>
+    $('#addCustomerForm').submit((e) => {
+        e.preventDefault();
+        const customerData = {
+            name: $('#name').val(),
+            ic_number: $('#ic_number').val(),
+            dob: $('#dob').val(),
+            address: $('#address').val(),
+            address_country: $('#address_country').val(),
+            address_postcode: $('#address_postcode').val()
+        };
+
+    if (!isAtLeast18(customerData.dob)) {
+        alert('You must be at least 18 years old to register.');
+        return;
+    }
+
+    $.ajax({
+        url: 'http://localhost:3000/customer',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(customerData),
+        success: function(response) {
+            alert('Customer Added');
+            window.location.href = 'customerList.html';
+        },
+        error: function(err) {
+            if (err.responseJSON && err.responseJSON.message) {
+                alert(err.responseJSON.message); 
+            } else if (err.responseText) {
+                alert(err.responseText); 
+            } else {
+                alert('An unexpected error occurred. Please try again.');
+            }
+            console.error(err);
+        }
+    });
+    });
+
+function isAtLeast18(dob) {
+    if (!dob) return false; 
+    const dobDate = new Date(dob);
+    const today = new Date();
+    const age = today.getFullYear() - dobDate.getFullYear();
+
+    const hasHadBirthdayThisYear = 
+        today.getMonth() > dobDate.getMonth() || 
+        (today.getMonth() === dobDate.getMonth() && today.getDate() >= dobDate.getDate());
+
+    return age > 18 || (age === 18 && hasHadBirthdayThisYear);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer List</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container mt-4">
+    <h1>Customer List</h1>
+    <input type="text" id="searchTerm" class="form-control mb-2" placeholder="Search by name or IC">
+    <button id="searchBtn" class="btn btn-primary mb-3">Search</button>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>IC Number</th>
+                <th>Date of Birth</th>
+                <th>Address</th>
+                <th>Country</th>
+                <th>Postcode</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="customerTable"></tbody>
+    </table>
+</div>
+<script>
+    function fetchCustomers(query = {}) {
+        let url = 'http://localhost:3000/customer';
+        const params = new URLSearchParams(query).toString();
+        if (params) url += `?${params}`;
+        $.get(url, (data) => {
+            $('#customerTable').empty();
+            if (data.length === 0) {
+                $('#customerTable').append(`
+                    <tr>
+                        <td colspan="7" class="text-center">No Data Found</td>
+                    </tr>
+                `);
+            } else {
+                data.forEach(customer => {
+                    $('#customerTable').append(`
+                        <tr>
+                            <td>${customer.name}</td>
+                            <td>${customer.ic_number}</td>
+                            <td>${customer.dob}</td>
+                            <td>${customer.address}</td>
+                            <td>${customer.address_country}</td>
+                            <td>${customer.address_postcode}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="editCustomer(${customer.id})">Edit</button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            }
+            
+        });
+    }
+
+    function editCustomer(id) {
+        window.location.href = `customerEdit.html?id=${id}`;
+    }
+
+    $('#searchBtn').click(() => {
+        const searchTerm = $('#searchTerm').val();
+        fetchCustomers({ searchTerm });
+    });
+    fetchCustomers();
+</script>
+</body>
+</html>
